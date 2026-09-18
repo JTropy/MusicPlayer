@@ -39,7 +39,7 @@ extension Package.Dependency {
 let package = Package(
     name: "MusicPlayer",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v11),
     ],
     products: [
         .library(name: "MusicPlayer", targets: ["MusicPlayer"]),
@@ -54,7 +54,7 @@ let package = Package(
             ),
             remote: .package(
                 url: "https://github.com/MxIris-LyricsX-Project/mediaremote-adapter",
-                exact: "0.1.5"
+                exact: "0.1.7"
             )
         ),
         
