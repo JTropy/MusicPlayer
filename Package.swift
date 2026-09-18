@@ -80,6 +80,16 @@ let package = Package(
         .target(
             name: "MediaRemotePrivate",
         ),
+        .testTarget(
+            name: "LXMusicPlayerTests",
+            dependencies: [
+                .target(name: "LXMusicPlayer"),
+            ],
+            cSettings: [
+                .headerSearchPath("../../Sources/LXMusicPlayer/Private"),
+                .headerSearchPath("../../Sources/LXMusicPlayer/BridgingHeader"),
+            ],
+        ),
     ],
     swiftLanguageModes: [.v5],
 )

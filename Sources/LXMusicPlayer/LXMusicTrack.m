@@ -51,6 +51,18 @@
     return @"id";
 }
 
+// Spotify's scripting dictionary documents `duration` as "the length of the
+// track in seconds", but the application answers in milliseconds: a 3:37 song
+// comes back as 217699. The raw value stays cached by the generated getter;
+// only what leaves this class is converted, so a copy converts the same way.
+- (NSNumber *)duration {
+    NSNumber *milliseconds = super.duration;
+    if (milliseconds == nil) {
+        return nil;
+    }
+    return @(milliseconds.doubleValue / 1000);
+}
+
 @end
 
 @implementation LXSwinsianTrack
