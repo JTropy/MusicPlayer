@@ -37,6 +37,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface LXSpotifyTrack : LXScriptingTrack
+
+/// Where Spotify keeps the cover. Its `artwork` property is documented as
+/// deprecated and never set; `artwork url` is what the application offers
+/// instead, so the cover has to be fetched from here.
+@property (nonatomic, readonly, nullable) NSURL *artworkURL;
+
 @end
 
 @interface LXSwinsianTrack : LXScriptingTrack

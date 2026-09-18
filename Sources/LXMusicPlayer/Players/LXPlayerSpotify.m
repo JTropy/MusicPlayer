@@ -11,6 +11,7 @@
 
 #import "LXScriptingMusicPlayer+Private.h"
 #import "LXMusicTrack+Private.h"
+#import "LXSpotifyArtworkLoader.h"
 #import "Spotify.h"
 
 static LXMusicTrack* currentTrack(SpotifyApplication *app) {
@@ -35,6 +36,12 @@ static LXPlayerState* playerState(SpotifyApplication *app) {
     return [LXPlayerState state:playbackState(app) playbackTime:app.playerPosition];
 }
 
+@interface LXPlayerSpotify ()
+
+@property (nonatomic, readonly) LXSpotifyArtworkLoader *artworkLoader;
+
+@end
+
 @implementation LXPlayerSpotify
 
 + (LXMusicPlayerName)playerName {
@@ -47,6 +54,7 @@ static LXPlayerState* playerState(SpotifyApplication *app) {
 
 - (instancetype)init {
     if ((self = [super init])) {
+        _artworkLoader = [[LXSpotifyArtworkLoader alloc] init];
         if (self.isRunning) {
             self.currentTrack = currentTrack(self.app);
             self.playerState = playerState(self.app);
@@ -84,6 +92,30 @@ static LXPlayerState* playerState(SpotifyApplication *app) {
     if (!self.isRunning) { return; }
     self.app.playerPosition = playbackTime;
     self.playerState = [LXPlayerState state:self.playerState.state playbackTime:playbackTime];
+}
+
+// Spotify's `artwork` property is deprecated and never set, so a new track
+// arrives without a cover; the cover is fetched from its `artwork url` and the
+// track is published a second time once it is in place.
+- (void)setCurrentTrack:(LXMusicTrack *)currentTrack {
+    [super setCurrentTrack:currentTrack];
+    [self loadArtworkIfNeededForTrack:currentTrack];
+}
+
+- (void)loadArtworkIfNeededForTrack:(LXMusicTrack *)track {
+    if (![track isKindOfClass:LXSpotifyTrack.class] || track.artwork != nil) {
+        [self.artworkLoader cancel];
+        return;
+    }
+    __weak typeof(self) weakSelf = self;
+    [self.artworkLoader loadArtworkForTrack:(LXSpotifyTrack *)track completion:^(LXSpotifyTrack *loadedTrack) {
+        typeof(self) strongSelf = weakSelf;
+        if (strongSelf == nil || strongSelf.currentTrack != loadedTrack) { return; }
+        // The same track again, now with its cover: observers of `currentTrack`
+        // see the change, and the setter finds the artwork in place instead of
+        // starting another request.
+        strongSelf.currentTrack = loadedTrack;
+    }];
 }
 
 - (void)updatePlayerState {

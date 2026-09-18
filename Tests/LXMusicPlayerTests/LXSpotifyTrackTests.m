@@ -39,6 +39,23 @@ static NSString *const LXSpotifyTrackTestsIdentifier = @"spotify:track:3zBhihYUH
     XCTAssertEqualWithAccuracy(track.duration.doubleValue, 217.699, 0.0005);
 }
 
+- (void)testArtworkURLComesFromSpotifysArtworkUrl {
+    NSString *artworkURLString = @"https://i.scdn.co/image/ab67616d0000b273b1b4a3b4f1bd1b9f6e5c2b3a";
+    LXSpotifyScriptingTrackStub *scriptingTrack =
+        [[LXSpotifyScriptingTrackStub alloc] initWithIdentifier:LXSpotifyTrackTestsIdentifier
+                                           durationMilliseconds:217699
+                                               artworkURLString:artworkURLString];
+    LXSpotifyTrack *track = [[LXSpotifyTrack alloc] initWithSBTrack:(SBObject *)scriptingTrack];
+
+    XCTAssertEqualObjects(track.artworkURL, [NSURL URLWithString:artworkURLString]);
+}
+
+- (void)testArtworkURLIsAbsentWhenSpotifyOffersNone {
+    LXSpotifyTrack *track = [self makeTrackWithDurationMilliseconds:217699];
+
+    XCTAssertNil(track.artworkURL);
+}
+
 - (void)testACopyKeepsTheDurationInSeconds {
     LXSpotifyTrack *track = [self makeTrackWithDurationMilliseconds:217699];
     (void)track.duration;

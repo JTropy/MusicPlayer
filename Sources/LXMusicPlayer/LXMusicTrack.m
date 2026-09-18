@@ -63,6 +63,18 @@
     return @(milliseconds.doubleValue / 1000);
 }
 
+- (NSURL *)artworkURL {
+    id originalTrack = self.originalTrack;
+    if (![originalTrack respondsToSelector:@selector(artworkUrl)]) {
+        return nil;
+    }
+    NSString *artworkURLString = [originalTrack valueForKey:@"artworkUrl"];
+    if (![artworkURLString isKindOfClass:NSString.class] || artworkURLString.length == 0) {
+        return nil;
+    }
+    return [NSURL URLWithString:artworkURLString];
+}
+
 @end
 
 @implementation LXSwinsianTrack
